@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Nice Try: Spot the Trick</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one image card at a time, a single "Legit" button under it. Tap the trick. */
+:root{
+  --desk:#e6e9e4; --paper:#fbfbf7; --ink:#1d2a2b; --muted:#5d6b6b; --rule:#cfd6d2;
+  --accent:#1f6f6a; --accent-soft:#d7ebe8; --stamp:#b3261e; --ok:#2f7d32; --hot:#d9480f; --sel:#fff2c2;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --desk:#121817; --paper:#1b2322; --ink:#e7ecea; --muted:#9aa9a6; --rule:#2f3b39;
+  --accent:#5fbdb4; --accent-soft:#1f3633; --stamp:#ff6b5e; --ok:#77c47a; --hot:#ff8a4c; --sel:#3d3720; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#121817; --paper:#1b2322; --ink:#e7ecea; --muted:#9aa9a6; --rule:#2f3b39;
+  --accent:#5fbdb4; --accent-soft:#1f3633; --stamp:#ff6b5e; --ok:#77c47a; --hot:#ff8a4c; --sel:#3d3720; color-scheme:dark}
+body{background:var(--desk);color:var(--ink);font:15px/1.5 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
+.app{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.brand{font:800 26px/1 var(--f-display)}
+.rule{font-size:14px;color:var(--muted)}
+.dots{display:flex;gap:5px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--rule)}
+.dots i.now{background:var(--ink)} .dots i.win{background:var(--ok)} .dots i.lose{background:var(--stamp)}
+.card{position:relative;background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:14px;overflow:hidden;min-height:340px;
+  box-shadow:0 10px 30px -18px rgba(0,0,0,.35)}
+.card.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hit{cursor:pointer;border-radius:4px;transition:background .15s}
+.hit:hover{background:var(--sel)}
+svg .hitbox{fill:transparent;cursor:pointer}
+svg g.hit:hover .hitbox{fill:var(--sel)}
+.ring{outline:3px solid var(--ok);outline-offset:3px}
+svg .ringbox{stroke:var(--ok);stroke-width:3;fill:none}
+svg text{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
+svg .t-big{font:800 17px var(--f-display);fill:var(--ink)}
+.caption{min-height:48px;font-size:15px;line-height:1.4}
+.caption b{font-family:var(--f-display)}
+.actions{display:flex;gap:8px}
+button{font:600 15px var(--f-body);border-radius:8px;padding:12px 16px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;flex:1}
+button.primary{background:var(--ink);color:var(--paper)}
+button:disabled{opacity:.35;cursor:default}
+button:focus-visible,.hit:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stamp{position:absolute;top:46%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);pointer-events:none;z-index:5;
+  font:800 54px/1 var(--f-display);color:var(--stamp);border:5px solid var(--stamp);padding:4px 14px;border-radius:8px;white-space:nowrap;
+  background:color-mix(in srgb,var(--paper) 75%,transparent);animation:thunk .35s cubic-bezier(.2,1.6,.4,1) both, fade 1.2s .9s forwards}
+.stamp.green{color:var(--ok);border-color:var(--ok)} .stamp.miss{color:var(--muted);border-color:var(--muted);font-size:42px}
+@keyframes thunk{from{transform:translate(-50%,-50%) rotate(-12deg) scale(2.2);opacity:0}}
+@keyframes fade{to{opacity:0}}
+@media (prefers-reduced-motion:reduce){.stamp{animation:none;opacity:.9}.card.shake{animation:none}}
+/* item: shelf */
+.shelf{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-top:6px}
+.box{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px;position:relative}
+.cereal{width:96px;border-radius:6px;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;font:800 15px/1.1 var(--f-display);padding:6px;box-shadow:inset 0 -10px 0 rgba(0,0,0,.15)}
+.badge{position:absolute;top:-4px;right:2px;background:#f2c200;color:#1d2a2b;font:800 12px/1.05 var(--f-display);padding:8px 6px;border-radius:50%;width:62px;height:62px;display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(12deg);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.tag{background:#fff;color:#1d2a2b;border:1px solid #c9c9c0;font:600 13px var(--f-mono);padding:4px 8px;border-radius:3px;text-align:center}
+.tag small{display:block;font-weight:400;font-size:10px;color:#555}
+.unit{font:600 13px var(--f-mono);padding:3px 8px;border-radius:3px;opacity:0;transform:translateY(-6px);transition:all .4s}
+.unit.show{opacity:1;transform:none}
+.unit.bad{background:var(--stamp);color:#fff} .unit.good{background:var(--ok);color:#fff}
+.badge.struck::after{content:"";position:absolute;left:4px;right:4px;top:50%;height:4px;background:var(--stamp);transform:rotate(-30deg)}
+/* item: ad */
+.ad{background:linear-gradient(160deg,#ff5d8f,#ffb347);color:#fff;border-radius:6px;padding:18px 16px 10px;display:flex;flex-direction:column;gap:10px;min-height:300px;position:relative}
+.ad .brandname{font:600 12px var(--f-mono);letter-spacing:.1em;opacity:.9}
+.ad .claim{font:800 34px/1 var(--f-display);text-transform:uppercase;text-wrap:balance}
+.ad .claim sup{font-size:22px}
+.ad .bottle{align-self:center;width:70px;height:110px;border-radius:14px 14px 8px 8px;background:#fff;opacity:.92;position:relative}
+.ad .bottle::before{content:"SVEL\ATO";white-space:pre;position:absolute;inset:40px 6px auto;text-align:center;font:800 13px/1 var(--f-display);color:#ff5d8f}
+.ad .buy{align-self:center;background:#fff;color:#d6336c;font:800 14px var(--f-display);padding:8px 18px;border-radius:20px}
+.fine{font:400 6.5px/1.3 var(--f-body);opacity:.75;transition:all .5s;transform-origin:left bottom}
+.fine.big{font-size:15px;opacity:1;background:rgba(0,0,0,.55);padding:8px;border-radius:4px}
+.share{font:500 15px/1.6 var(--f-mono);white-space:pre-wrap;background:var(--accent-soft);padding:12px;border-radius:6px}
+</style>
+<style>
+.days{display:flex;gap:6px}
+.days button{flex:0 0 auto;padding:6px 12px;font-size:13px;border-radius:20px;border-color:var(--rule)}
+.days button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.news{display:flex;flex-direction:column;gap:8px;padding:4px}
+.kicker{font:600 11px var(--f-mono);letter-spacing:.1em;color:var(--stamp)}
+.hl{font:800 26px/1.1 var(--f-display);text-wrap:balance}
+.dek{font-size:14px;color:var(--muted)}
+.photo{height:110px;border-radius:4px}
+.grid100{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:6px;max-width:220px}
+.grid100 i{aspect-ratio:1;border-radius:50%;background:var(--rule)}
+.grid100 i.base{background:var(--stamp)} .grid100 i.extra{background:var(--hot)}
+.bags{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end;padding-top:24px;position:relative}
+.bag{border-radius:10px 10px 6px 6px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 6px;font:800 16px/1.1 var(--f-display);text-align:center}
+.bag .wt{font:600 13px var(--f-mono);background:rgba(255,255,255,.9);color:#1d2a2b;padding:2px 6px;border-radius:3px}
+.lbl{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:4px}
+.banner{position:absolute;top:0;right:0;background:#f2c200;color:#1d2a2b;font:800 13px var(--f-display);padding:6px 10px;border-radius:4px;transform:rotate(4deg)}
+.mathbox{font:600 15px/1.7 var(--f-mono);background:var(--accent-soft);padding:10px 12px;border-radius:6px;opacity:0;transform:translateY(6px);transition:all .4s;margin-top:10px}
+.mathbox.show{opacity:1;transform:none}
+.sign{background:#d6336c;color:#fff;border-radius:6px;padding:18px 14px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;font-family:var(--f-display)}
+.sign .a{font:800 30px/1 var(--f-display)} .sign .b{font:800 22px/1 var(--f-display);opacity:.9}
+.sign .c{font:800 44px/1 var(--f-display);background:#fff;color:#d6336c;padding:4px 12px;border-radius:6px;margin-top:6px}
+.pricetag{background:#fff;color:#1d2a2b;border:2px solid #1d2a2b;border-radius:6px 30px 30px 6px;padding:16px 28px 16px 18px;display:inline-flex;flex-direction:column;gap:2px;font-family:var(--f-mono)}
+.pricetag s{color:#777}
+.pricetag .now{font:800 34px var(--f-display)}
+.shelfwrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 0}
+.shirt{width:120px;height:110px;background:var(--accent);clip-path:polygon(25% 0,75% 0,100% 20%,85% 35%,85% 100%,15% 100%,15% 35%,0 20%)}
+</style>
+
+<div class="app">
+  <header>
+    <div><div class="brand">Nice Try</div><div class="rule">Every picture hides a trick, or doesn't. Tap the trick, or call it legit.</div></div>
+    <div class="dots" id="dots"></div>
+  </header>
+  <div class="days" id="days" aria-label="Playtest day"></div>
+  <div class="card" id="card"></div>
+  <div class="caption" id="caption"></div>
+  <div class="actions" id="actions">
+    <button id="legit">Legit</button>
+    <button class="primary" id="next" hidden>Next</button>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const events=[]; function track(n,p){events.push({event:n,t:new Date().toISOString(),day:day+1,...p}); /* Production: posthog.capture(n,p) */}
+function tween(ms,fn){ if(reduced){fn(1);return;} const s=performance.now(); (function f(now){const k=Math.min(1,(now-s)/ms); const e=1-Math.pow(1-k,3); fn(e); if(k<1) requestAnimationFrame(f);})(s); }
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const W=320,H=240,L=44,R=310,B=200,T=46;
+const title=(t,id='title')=>`<g class="hit" data-hit="${id}"><rect class="hitbox" x="0" y="0" width="${W}" height="36" rx="4"/><text class="t-big" x="8" y="25">${t}</text></g>`;
+const axisLines=()=>`<line x1="${L}" x2="${R}" y1="${B}" y2="${B}" stroke="${css('--ink')}" stroke-width="1.5"/>`;
+function grid(lo,hi,ticks,fmt=t=>t,hit){
+  const y=v=>B-(v-lo)/(hi-lo)*(B-T); let s='';
+  ticks.forEach(t=>s+=`<line x1="${L}" x2="${R}" y1="${y(t)}" y2="${y(t)}" stroke="${css('--rule')}"/>`);
+  const labels=`<line x1="${L}" x2="${L}" y1="${T}" y2="${B}" stroke="${css('--ink')}" stroke-width="1.5"/>`+ticks.map(t=>`<text x="${L-5}" y="${y(t)+4}" text-anchor="end">${fmt(t)}</text>`).join('');
+  s+= hit?`<g class="hit" data-hit="${hit}"><rect class="hitbox" x="0" y="${T-8}" width="${L+4}" height="${B-T+16}" rx="4"/>${labels}</g>`:labels;
+  return {s,y};
+}
+function rng(seed){return()=>{seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296;};}
+
+/* ===== Day 1 ===== */
+function barsSVG(lo,hi){
+  const d=[['2024',102],['2025',104]],bw=80; const step=hi-lo>50?20:1; const ticks=[]; for(let t=Math.ceil(lo/step)*step;t<=hi;t+=step) ticks.push(t);
+  const g=grid(lo,hi,ticks,t=>t,'axis');
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">${title('SALES DOUBLED IN ONE YEAR!')}${g.s}`;
+  d.forEach((r,i)=>{const x=L+40+i*(bw+50); s+=`<g class="hit" data-hit="bar"><rect class="hitbox" x="${x-6}" y="${T}" width="${bw+12}" height="${B-T}" rx="4"/><rect x="${x}" y="${g.y(r[1])}" width="${bw}" height="${B-g.y(r[1])}" fill="${css('--accent')}"/><text x="${x+bw/2}" y="${g.y(r[1])-6}" text-anchor="middle">$${r[1]}k</text><text x="${x+bw/2}" y="${B+16}" text-anchor="middle">${r[0]}</text></g>`;});
+  return s+axisLines()+'</svg>';
+}
+const STOCK=(()=>{const r=rng(7);const a=[];let v=100;for(let i=0;i<360;i++){v+= -0.19+(r()-.5)*1.6; a.push(v);}const last=a[359];for(let i=1;i<=5;i++)a.push(last*(1+0.4*i/5)+(r()-.5)*.6);return a;})();
+function stockSVG(start){
+  const seg=STOCK.slice(Math.floor(start)); const lo=Math.min(...seg)*0.92, hi=Math.max(...seg)*1.04;
+  const x=i=>L+i/(seg.length-1)*(R-L), y=v=>B-(v-lo)/(hi-lo)*(B-T);
+  const path=seg.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+  const label=start<1?'Last 12 months':'This week (Mon – Fri)';
+  const top=Math.max(...seg), bot=Math.min(...seg);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${title('SPARKLINE INC. UP 40% THIS WEEK')}`+
+   `<line x1="${L}" x2="${R}" y1="${y(top)}" y2="${y(top)}" stroke="${css('--rule')}"/><line x1="${L}" x2="${R}" y1="${y(bot)}" y2="${y(bot)}" stroke="${css('--rule')}"/>`+
+   `<text x="${L-5}" y="${y(top)+4}" text-anchor="end">$${top.toFixed(0)}</text><text x="${L-5}" y="${y(bot)+4}" text-anchor="end">$${bot.toFixed(0)}</text>`+
+   `<g class="hit" data-hit="line"><rect class="hitbox" x="${L}" y="${T}" width="${R-L}" height="${B-T}" rx="4"/><path d="${path}" fill="none" stroke="${css('--accent')}" stroke-width="2.5" stroke-linejoin="round"/></g>`+
+   axisLines()+`<g class="hit" data-hit="range"><rect class="hitbox" x="${L}" y="${B+2}" width="${R-L}" height="30" rx="4"/><text x="${(L+R)/2}" y="${B+20}" text-anchor="middle" style="font-weight:600;fill:${css('--ink')}">${label}</text></g></svg>`;
+}
+function honestBusSVG(){
+  const d=[['2022',41],['2023',43],['2024',44],['2025',42]],bw=46; const g=grid(0,50,[0,10,20,30,40,50]);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">${title('Bus rides dipped a little in 2025')}${g.s}`;
+  d.forEach((r,i)=>{const x=L+20+i*(bw+22); s+=`<g class="hit" data-hit="bar"><rect class="hitbox" x="${x-4}" y="${T}" width="${bw+8}" height="${B-T}" rx="4"/><rect x="${x}" y="${g.y(r[1])}" width="${bw}" height="${B-g.y(r[1])}" fill="${css('--accent')}"/><text x="${x+bw/2}" y="${g.y(r[1])-6}" text-anchor="middle">${r[1]}M</text><text x="${x+bw/2}" y="${B+16}" text-anchor="middle">${r[0]}</text></g>`;});
+  return s+axisLines()+'</svg>';
+}
+
+/* ===== Day 2 ===== */
+function unempSVG(){
+  const d=[3.9,3.8,3.9,4.0,3.9,4.0,4.1,4.1]; const g=grid(3.5,4.5,[3.5,3.75,4.0,4.25,4.5],t=>t.toFixed(2).replace(/0$/,'')+'%');
+  const x=i=>L+10+i/(d.length-1)*(R-L-20);
+  const path=d.map((v,i)=>(i?'L':'M')+x(i)+' '+g.y(v)).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${title('Unemployment ticked up slightly')}${g.s}<g class="hit" data-hit="line"><rect class="hitbox" x="${L}" y="${T}" width="${R-L}" height="${B-T}" rx="4"/><path d="${path}" fill="none" stroke="${css('--accent')}" stroke-width="2.5"/>${d.map((v,i)=>`<circle cx="${x(i)}" cy="${g.y(v)}" r="3" fill="${css('--accent')}"/>`).join('')}</g>`+axisLines()+`<text x="${L}" y="${B+16}">Jan</text><text x="${R}" y="${B+16}" text-anchor="end">Aug</text></svg>`;
+}
+const PHONE=[['Battery life',45],['Camera',38],['Price',30],['Screen size',15]];
+const PIE_COL=['#1f6f6a','#d9480f','#7048e8','#f2c200'];
+function pieSVG(){
+  const cx=160,cy=135,r=78; const tot=PHONE.reduce((a,b)=>a+b[1],0); let a0=-Math.PI/2, s='';
+  PHONE.forEach((p,i)=>{const a1=a0+p[1]/tot*2*Math.PI; const big=a1-a0>Math.PI?1:0;
+    s+=`<path d="M${cx} ${cy} L${cx+r*Math.cos(a0)} ${cy+r*Math.sin(a0)} A${r} ${r} 0 ${big} 1 ${cx+r*Math.cos(a1)} ${cy+r*Math.sin(a1)} Z" fill="${PIE_COL[i]}" stroke="${css('--paper')}" stroke-width="2"/>`;
+    const am=(a0+a1)/2; s+=`<text x="${cx+(r+22)*Math.cos(am)}" y="${cy+(r+22)*Math.sin(am)+4}" text-anchor="middle" style="fill:${css('--ink')};font-weight:600">${p[1]}%</text>`; a0=a1;});
+  const leg=PHONE.map((p,i)=>`<rect x="${8+i*78}" y="226" width="9" height="9" fill="${PIE_COL[i]}"/><text x="${20+i*78}" y="234" style="font-size:10px">${p[0]}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${title('What buyers want most in a phone')}<g class="hit" data-hit="pie"><rect class="hitbox" x="60" y="40" width="200" height="182" rx="6"/>${s}</g>${leg}</svg>`;
+}
+function phoneBarsSVG(){
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%"><text class="t-big" x="8" y="25">What buyers want (pick any)</text>`;
+  PHONE.forEach((p,i)=>{const y=52+i*42, w=p[1]/50*200; s+=`<text x="8" y="${y+15}" style="fill:${css('--ink')}">${p[0]}</text><rect x="100" y="${y}" width="${w}" height="22" fill="${PIE_COL[i]}"/><text x="${106+w}" y="${y+15}">${p[1]}%</text>`;});
+  return s+'</svg>';
+}
+
+/* ===== Day 3 ===== */
+const MONTHLY=[9,8.4,7.6,7.1,6.2,5.6,4.9,4.4];
+function cumSVG(k){
+  const lab=['J','F','M','A','M','J','J','A']; let c=0; const cum=MONTHLY.map(v=>c+=v);
+  const vals=MONTHLY.map((v,i)=>cum[i]*(1-k)+v*k), hi=60*(1-k)+10*k;
+  const step=k<.5?10:2, ticks=[]; for(let t=0;t<=hi+.01;t+=step) ticks.push(t);
+  const g=grid(0,hi,ticks);
+  const ttl=k<.5?'APP DOWNLOADS KEEP CLIMBING!':'New downloads each month';
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">${title(ttl)}${g.s}`;
+  const bw=24; vals.forEach((v,i)=>{const x=L+8+i*32; s+=`<g class="hit" data-hit="line"><rect class="hitbox" x="${x-3}" y="${T}" width="${bw+6}" height="${B-T}"/><rect x="${x}" y="${g.y(v)}" width="${bw}" height="${B-g.y(v)}" fill="${css('--accent')}"/><text x="${x+bw/2}" y="${B+14}" text-anchor="middle">${lab[i]}</text></g>`;});
+  s+=`<g class="hit" data-hit="ylabel"><rect class="hitbox" x="${L+2}" y="${T-12}" width="170" height="16" rx="3"/><text x="${L+6}" y="${T}" style="font-weight:600;fill:${css('--ink')}">${k<.5?'TOTAL downloads (millions)':'Downloads that month (millions)'}</text></g>`;
+  return s+axisLines()+'</svg>';
+}
+const SCAT=(()=>{const r=rng(3);const pts=[];for(let m=0;m<24;m++){const temp=50+30*Math.sin((m%12-3)/12*2*Math.PI);const ic=20+temp*1.1+(r()-.5)*14;const dr=temp*0.12-4+(r()-.5)*2.4;pts.push([ic,Math.max(0.3,dr),temp]);}return pts;})();
+function scatSVG(colored){
+  const xs=SCAT.map(p=>p[0]), ys=SCAT.map(p=>p[1]); const x0=Math.min(...xs)-5,x1=Math.max(...xs)+5,y1=Math.max(...ys)+1;
+  const x=v=>L+(v-x0)/(x1-x0)*(R-L), y=v=>B-v/y1*(B-T);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">${title('Ice cream sales linked to drownings','headline')}`;
+  s+=`<g class="hit" data-hit="dots"><rect class="hitbox" x="${L}" y="${T}" width="${R-L}" height="${B-T}" rx="4"/>`;
+  SCAT.forEach(p=>{const hot=p[2]>65; s+=`<circle cx="${x(p[0])}" cy="${y(p[1])}" r="5" fill="${colored?(hot?css('--hot'):'#4c6ef5'):css('--accent')}" opacity=".85"/>`;});
+  s+='</g>'+axisLines()+`<line x1="${L}" x2="${L}" y1="${T}" y2="${B}" stroke="${css('--ink')}" stroke-width="1.5"/><text x="${(L+R)/2}" y="${B+16}" text-anchor="middle">Ice cream sold (by month) →</text><text x="12" y="${(T+B)/2}" transform="rotate(-90 12 ${(T+B)/2})" text-anchor="middle">Drownings →</text>`;
+  if(colored) s+=`<circle cx="${L+12}" cy="${T+6}" r="5" fill="${css('--hot')}"/><text x="${L+22}" y="${T+10}">Hot months</text><circle cx="${L+102}" cy="${T+6}" r="5" fill="#4c6ef5"/><text x="${L+112}" y="${T+10}">Cool months</text>`;
+  return s+'</svg>';
+}
+const SAL=[38,40,42,44,46,46,48,50,52,714];
+function salSVG(showMed){
+  const bw=22, hi=720, y=v=>B-v/hi*(B-T);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">${title('Average pay at Acme: $112,000','headline')}`;
+  s+=`<text x="${L-5}" y="${B+4}" text-anchor="end">$0</text><text x="${L-5}" y="${y(700)+4}" text-anchor="end">$700k</text>`;
+  SAL.forEach((v,i)=>{const x=L+6+i*26; s+=`<g class="hit" data-hit="bars"><rect class="hitbox" x="${x-2}" y="${T}" width="${bw+4}" height="${B-T}"/><rect x="${x}" y="${y(v)}" width="${bw}" height="${Math.max(2,B-y(v))}" fill="${i===9?css('--hot'):css('--accent')}"/></g>`;});
+  s+=`<text x="${L+6+9*26+bw/2}" y="${y(714)-5}" text-anchor="middle">CEO</text><text x="${(L+R)/2}" y="${B+16}" text-anchor="middle">Each bar = one employee</text>`;
+  if(showMed){ s+=`<line x1="${L}" x2="${R}" y1="${y(46)-1}" y2="${y(46)-1}" stroke="${css('--ok')}" stroke-width="2" stroke-dasharray="5 3"/><text x="${L+4}" y="${y(46)-8}" style="fill:${css('--ok')};font-weight:600">Typical (median) pay: $46k</text>`; }
+  return s+axisLines()+'</svg>';
+}
+
+/* ===== card list ===== */
+const DAYS=[[
+ { id:'bars', trick:['axis'], render(el){el.innerHTML=barsSVG(100,105);}, fix(el){tween(900,k=>{el.innerHTML=barsSVG(100-100*k,105+15*k);});},
+   win:'<b>The axis starts at 100.</b> From zero, sales grew 2%. Not doubled.', lose:'The trick was the axis. It starts at 100, so 2% growth looks like double.' },
+ { id:'shelf', trick:['badge'],
+   render(el){el.innerHTML=`<div class="shelf">
+     <div class="box"><div class="cereal hit" data-hit="box" style="height:150px;background:#c2410c">Crunch<br>Os</div><div class="tag hit" data-hit="tag">$4.29<small>18 oz</small></div><div class="unit" id="u1">23.8¢ / oz</div></div>
+     <div class="box"><div class="cereal hit" data-hit="box" style="height:190px;background:#c2410c">Crunch<br>Os</div><div class="badge hit" data-hit="badge" id="badge">BIG VALUE SIZE!</div><div class="tag hit" data-hit="tag">$6.49<small>24 oz</small></div><div class="unit" id="u2">27.0¢ / oz</div></div></div>`;},
+   fix(el){el.querySelector('#badge').classList.add('struck'); setTimeout(()=>{el.querySelector('#u1').classList.add('show','good'); el.querySelector('#u2').classList.add('show','bad');},200);},
+   win:'<b>"Big Value" costs more per ounce.</b> The small box is the better deal.', lose:'The trick was the badge. Per ounce, the "big value" box costs more.' },
+ { id:'ad', trick:['fine','claim'],
+   render(el){el.innerHTML=`<div class="ad"><div class="brandname hit" data-hit="brand">SVELTO™ PLUS</div><div class="claim hit" data-hit="claim">Lose 20 lbs in 2 weeks<sup>*</sup></div>
+     <div class="bottle hit" data-hit="bottle"></div><div class="buy hit" data-hit="buy">Order now</div>
+     <div class="fine hit" data-hit="fine" id="fine">*Results not typical. Participants also followed a 1,200-calorie diet and exercised 2 hours daily. Average loss in clinical study: 2.1 lbs.</div></div>`;},
+   fix(el){el.querySelector('#fine').classList.add('big');},
+   win:'<b>Read the asterisk.</b> Average loss was 2.1 lbs, with a strict diet.', lose:'The trick was the fine print. Average loss: 2.1 lbs, with a strict diet.' },
+ { id:'bus', trick:[], render(el){el.innerHTML=honestBusSVG();}, fix(){},
+   win:'<b>Legit.</b> Axis from zero, headline matches the bars. Not everything is a con.', lose:'This one was legit. Axis from zero, and the headline matches the data.' },
+ { id:'stock', trick:['range'], render(el){el.innerHTML=stockSVG(360);}, fix(el){tween(1300,k=>{el.innerHTML=stockSVG(360-360*k);});},
+   win:'<b>They only showed one week.</b> Zoom out: the stock is down by more than half this year.', lose:'The trick was the date range. Zoom out and the stock is down by more than half this year.' }
+],[
+ { id:'bacon', trick:['headline'],
+   render(el){el.innerHTML=`<div class="news"><div class="kicker hit" data-hit="kicker">HEALTH</div><div class="hl hit" data-hit="headline">Bacon raises cancer risk by 18%</div><div class="dek hit" data-hit="dek">A large study followed 470,000 adults for 10 years.</div><div class="photo hit" data-hit="photo" style="background:repeating-linear-gradient(170deg,#b5523b 0 14px,#f0c9a8 14px 22px)"></div><div id="g"></div></div>`;},
+   fix(el){const g=el.querySelector('#g'); g.innerHTML='<div class="grid100">'+Array.from({length:100},(_,i)=>`<i class="${i<5?'base':i<6?'extra':''}"></i>`).join('')+'</div><div class="dek" style="margin-top:6px">Out of 100 people: 5 get this cancer anyway. Daily bacon adds about 1 more.</div>'; el.querySelector('.photo').style.display='none';},
+   win:'<b>18% of a small number is small.</b> Risk goes from about 5 in 100 to 6 in 100.', lose:'The trick was the headline. "18% higher" means about 5 in 100 becomes 6 in 100.' },
+ { id:'chips', trick:['banner','weight'],
+   render(el){el.innerHTML=`<div class="bags"><div class="banner hit" data-hit="banner">SAME GREAT PRICE!</div>
+     <div><div class="bag hit" data-hit="bag" style="height:200px;background:#2b8a3e">Crispers<span class="wt hit" data-hit="oldweight">10 oz</span></div><div class="lbl">Last year · $4.99</div></div>
+     <div><div class="bag hit" data-hit="bag" style="height:200px;background:#2b8a3e">Crispers<span class="wt hit" data-hit="weight">8.5 oz</span></div><div class="lbl">Now · $4.99</div></div></div><div class="mathbox" id="m">15% fewer chips, same price.<br>That’s an 18% price hike per ounce.</div>`;},
+   fix(el){el.querySelector('#m').classList.add('show');},
+   win:'<b>Same price, smaller bag.</b> You pay 18% more per ounce.', lose:'The trick was the weight. Same price for 15% fewer chips is a hidden price hike.' },
+ { id:'unemp', trick:[], render(el){el.innerHTML=unempSVG();}, fix(){},
+   win:'<b>Legit.</b> Line charts don’t need to start at zero, and the headline says "slightly."', lose:'This one was legit. The axis is clearly labeled and the headline says "slightly."' },
+ { id:'pie', trick:['pie'], render(el){el.innerHTML=pieSVG();}, fix(el){el.innerHTML=pieSVG(); setTimeout(()=>{el.style.transition='opacity .3s'; el.style.opacity=0; setTimeout(()=>{el.innerHTML=phoneBarsSVG()+'<div class="mathbox show">45 + 38 + 30 + 15 = 128%</div>'; el.style.opacity=1;},300);},300);},
+   win:'<b>The slices add up to 128%.</b> People picked more than one answer, so it can’t be a pie.', lose:'The trick was the pie itself. The slices add to 128%, so a pie makes no sense.' },
+ { id:'dentists', trick:['foot'],
+   render(el){el.innerHTML=`<div class="news"><div class="hl hit" data-hit="headline" style="font-size:24px">9 out of 10 dentists recommend BrightSmile</div>
+     <svg class="hit" data-hit="chart" viewBox="0 0 200 120" width="70%" style="align-self:center"><circle cx="100" cy="60" r="50" fill="${css('--rule')}"/><path d="M100 60 L100 10 A50 50 0 1 1 70.6 19.5 Z" fill="${css('--accent')}"/><text x="100" y="66" text-anchor="middle" style="font:800 22px var(--f-display);fill:#fff">90%</text></svg>
+     <div class="fine hit" data-hit="foot" id="fine" style="color:var(--muted)">Survey of 10 dentists on the BrightSmile advisory board, 2025.</div></div>`;},
+   fix(el){const f=el.querySelector('#fine'); f.classList.add('big'); f.style.color='#fff';},
+   win:'<b>Ten dentists, all paid by BrightSmile.</b> That’s not a survey, it’s a staff meeting.', lose:'The trick was the footnote: 10 dentists, all on BrightSmile’s payroll.' }
+],[
+ { id:'downloads', trick:['ylabel'], render(el){el.innerHTML=cumSVG(0);}, fix(el){tween(1100,k=>{el.innerHTML=cumSVG(k);});},
+   win:'<b>It’s a running total.</b> Totals only go up. Monthly downloads are falling fast.', lose:'The trick was the axis label: a running total always climbs. Monthly downloads are falling.' },
+ { id:'icecream', trick:['headline'], render(el){el.innerHTML=scatSVG(false);}, fix(el){el.innerHTML=scatSVG(true);},
+   win:'<b>Hot weather drives both.</b> Linked doesn’t mean one causes the other.', lose:'The trick was the headline. Summer drives both ice cream and swimming.' },
+ { id:'sale', trick:['total'],
+   render(el){el.innerHTML=`<div class="shelfwrap"><div class="sign"><div class="a hit" data-hit="first">50% OFF</div><div class="b hit" data-hit="second">+ extra 20% off at checkout</div><div class="c hit" data-hit="total">= 70% OFF!</div></div><div class="mathbox" id="m">$100 → 50% off → $50<br>$50 → 20% off → $40<br>Real discount: 60%</div></div>`;},
+   fix(el){el.querySelector('#m').classList.add('show');},
+   win:'<b>Discounts don’t add.</b> 50% then 20% is 60% off, not 70%.', lose:'The trick was the total. 50% then 20% off is 60%, not 70%.' },
+ { id:'shirt', trick:[],
+   render(el){el.innerHTML=`<div class="shelfwrap"><div class="shirt hit" data-hit="shirt"></div><div class="pricetag hit" data-hit="tag"><span>Was <s>$80</s></span><span class="now">$60</span><span>Save 25%</span></div></div>`;}, fix(){},
+   win:'<b>Legit.</b> $20 off $80 really is 25%.', lose:'This one was legit. $20 off $80 is exactly 25%.' },
+ { id:'salary', trick:['headline'], render(el){el.innerHTML=salSVG(false);}, fix(el){el.innerHTML=salSVG(true);},
+   win:'<b>One CEO drags the average up.</b> Typical pay is $46k.', lose:'The trick was "average." One huge salary skews it. Typical pay is $46k.' }
+]];
+
+let day=0, items, i, results, t0, locked;
+function dayBar(){const d=$('days'); d.innerHTML=''; DAYS.forEach((_,k)=>{const b=document.createElement('button'); b.textContent='Day '+(k+1); if(k===day) b.className='on'; b.onclick=()=>{day=k; startDay();}; d.appendChild(b);});}
+function startDay(){items=DAYS[day]; i=0; results=[]; $('next').onclick=nextCard; dayBar(); track('set_started',{}); show();}
+function dots(){const d=$('dots'); d.innerHTML=''; items.forEach((_,k)=>{const e=document.createElement('i'); if(k<results.length) e.className=results[k]?'win':'lose'; else if(k===i) e.className='now'; d.appendChild(e);});}
+function show(){
+  locked=false; const it=items[i]; const card=$('card');
+  card.innerHTML=''; const box=document.createElement('div'); card.appendChild(box); it.render(box);
+  $('caption').innerHTML=''; $('legit').hidden=false; $('next').hidden=true;
+  dots(); t0=Date.now(); track('case_started',{case_id:it.id,position:i+1});
+}
+function answer(hit){
+  if(locked) return; locked=true;
+  const it=items[i], card=$('card'), box=card.firstChild;
+  const right = hit==='legit' ? it.trick.length===0 : it.trick.includes(hit);
+  results.push(right); track('case_answered',{case_id:it.id,pick:hit,correct:right,seconds:+((Date.now()-t0)/1000).toFixed(1)});
+  if(!right){card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');}
+  const st=document.createElement('div');
+  st.className='stamp'+(right?(it.trick.length?'':' green'):' miss');
+  st.textContent=right?(it.trick.length?'AS IF.':'LEGIT'):'NICE TRY';
+  card.appendChild(st);
+  setTimeout(()=>{ it.fix(box); },450);
+  $('caption').innerHTML=right?it.win:it.lose;
+  $('legit').hidden=true; $('next').hidden=false; $('next').textContent=i<items.length-1?'Next':'See score'; $('next').focus({preventScroll:true});
+  dots();
+}
+function nextCard(){ i++; i<items.length?show():summary(); }
+$('card').addEventListener('click',e=>{ if(locked) return; const h=e.target.closest('[data-hit]'); if(h) answer(h.dataset.hit);});
+$('legit').onclick=()=>answer('legit');
+function summary(){
+  const n=results.filter(Boolean).length; track('set_completed',{score:n});
+  const tiles=results.map(r=>r?'🟩':'🟥').join('');
+  const share=`Nice Try #00${day+1}  ${tiles}  ${n}/5\nnicetry.game`;
+  $('card').innerHTML=`<div style="display:flex;flex-direction:column;gap:14px;padding:8px 2px">
+    <div style="font:800 30px/1.05 var(--f-display)">${n===5?'Nothing gets past you.':n>=3?'Pretty sharp.':'They got you today.'}</div>
+    <div class="share">${share}</div><div class="rule">Spoiler-free. Paste it anywhere.${day<2?' Come back tomorrow for Day '+(day+2)+'.':''}</div></div>`;
+  $('caption').innerHTML=''; $('legit').hidden=true;
+  const nx=$('next'); nx.textContent='Copy result'; nx.onclick=()=>{track('share_clicked',{}); navigator.clipboard?.writeText(share).then(()=>nx.textContent='Copied').catch(()=>{});};
+  dots();
+}
+startDay();
+})();
+</script>
+
+</html>
