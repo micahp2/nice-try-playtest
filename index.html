@@ -82,6 +82,7 @@ button:focus-visible,.hit:focus-visible{outline:2px solid var(--accent);outline-
 .share{font:500 15px/1.6 var(--f-mono);white-space:pre-wrap;background:var(--accent-soft);padding:12px;border-radius:6px}
 </style>
 <style>
+.card.pointing{outline:3px dashed var(--stamp);outline-offset:-8px}
 .days{display:flex;gap:6px}
 .days button{flex:0 0 auto;padding:6px 12px;font-size:13px;border-radius:20px;border-color:var(--rule)}
 .days button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -112,13 +113,14 @@ button:focus-visible,.hit:focus-visible{outline:2px solid var(--accent);outline-
 
 <div class="app">
   <header>
-    <div><div class="brand">Nice Try</div><div class="rule">Every picture hides a trick, or doesn't. Tap the trick, or call it legit.</div></div>
+    <div><div class="brand">Nice Try</div><div class="rule">Some of these pictures pull a fast one. Spot the trick, or call it legit.</div></div>
     <div class="dots" id="dots"></div>
   </header>
   <div class="days" id="days" aria-label="Playtest day"></div>
   <div class="card" id="card"></div>
   <div class="caption" id="caption"></div>
   <div class="actions" id="actions">
+    <button id="fishy">Something's off</button>
     <button id="legit">Legit</button>
     <button class="primary" id="next" hidden>Next</button>
   </div>
@@ -293,7 +295,7 @@ function dots(){const d=$('dots'); d.innerHTML=''; items.forEach((_,k)=>{const e
 function show(){
   locked=false; const it=items[i]; const card=$('card');
   card.innerHTML=''; const box=document.createElement('div'); card.appendChild(box); it.render(box);
-  $('caption').innerHTML=''; $('legit').hidden=false; $('next').hidden=true;
+  $('caption').innerHTML=''; $('legit').hidden=false; $('fishy').hidden=false; card.classList.remove('pointing'); $('next').hidden=true;
   dots(); t0=Date.now(); track('case_started',{case_id:it.id,position:i+1});
 }
 function answer(hit){
@@ -308,12 +310,13 @@ function answer(hit){
   card.appendChild(st);
   setTimeout(()=>{ it.fix(box); },450);
   $('caption').innerHTML=right?it.win:it.lose;
-  $('legit').hidden=true; $('next').hidden=false; $('next').textContent=i<items.length-1?'Next':'See score'; $('next').focus({preventScroll:true});
+  $('legit').hidden=true; $('fishy').hidden=true; card.classList.remove('pointing'); $('next').hidden=false; $('next').textContent=i<items.length-1?'Next':'See score'; $('next').focus({preventScroll:true});
   dots();
 }
 function nextCard(){ i++; i<items.length?show():summary(); }
 $('card').addEventListener('click',e=>{ if(locked) return; const h=e.target.closest('[data-hit]'); if(h) answer(h.dataset.hit);});
 $('legit').onclick=()=>answer('legit');
+$('fishy').onclick=()=>{ if(locked) return; $('card').classList.add('pointing'); $('caption').innerHTML='<b>Where\u2019s the trick?</b> Tap it on the picture.'; track('fishy_pressed',{case_id:items[i].id}); };
 function summary(){
   const n=results.filter(Boolean).length; track('set_completed',{score:n});
   const tiles=results.map(r=>r?'🟩':'🟥').join('');
@@ -321,7 +324,7 @@ function summary(){
   $('card').innerHTML=`<div style="display:flex;flex-direction:column;gap:14px;padding:8px 2px">
     <div style="font:800 30px/1.05 var(--f-display)">${n===5?'Nothing gets past you.':n>=3?'Pretty sharp.':'They got you today.'}</div>
     <div class="share">${share}</div><div class="rule">Spoiler-free. Paste it anywhere.${day<2?' Come back tomorrow for Day '+(day+2)+'.':''}</div></div>`;
-  $('caption').innerHTML=''; $('legit').hidden=true;
+  $('caption').innerHTML=''; $('legit').hidden=true; $('fishy').hidden=true; $('card').classList.remove('pointing');
   const nx=$('next'); nx.textContent='Copy result'; nx.onclick=()=>{track('share_clicked',{}); navigator.clipboard?.writeText(share).then(()=>nx.textContent='Copied').catch(()=>{});};
   dots();
 }
