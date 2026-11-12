@@ -79,6 +79,14 @@ button:focus-visible,.hit:focus-visible{outline:2px solid var(--accent);outline-
 .ad .buy{align-self:center;background:#fff;color:#d6336c;font:800 14px var(--f-display);padding:8px 18px;border-radius:20px}
 .fine{font:400 6.5px/1.3 var(--f-body);opacity:.75;transition:all .5s;transform-origin:left bottom}
 .fine.big{font-size:15px;opacity:1;background:rgba(0,0,0,.55);padding:8px;border-radius:4px}
+.fb{display:flex;flex-direction:column;gap:14px;padding:4px 2px}
+.q{display:flex;flex-direction:column;gap:6px}
+.q label{font:600 14px var(--f-body)}
+.q .opt{font-weight:400;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{flex:0 0 auto;padding:7px 12px;font-size:13px;border-radius:20px;border-color:var(--rule);font-weight:500}
+.chips button.on{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+textarea{font:400 14px var(--f-body);padding:8px 10px;border-radius:6px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);resize:vertical;width:100%}
 .share{font:500 15px/1.6 var(--f-mono);white-space:pre-wrap;background:var(--accent-soft);padding:12px;border-radius:6px}
 </style>
 <style>
@@ -317,17 +325,42 @@ function nextCard(){ i++; i<items.length?show():summary(); }
 $('card').addEventListener('click',e=>{ if(locked) return; const h=e.target.closest('[data-hit]'); if(h) answer(h.dataset.hit);});
 $('legit').onclick=()=>answer('legit');
 $('fishy').onclick=()=>{ if(locked) return; $('card').classList.add('pointing'); $('caption').innerHTML='<b>Where\u2019s the trick?</b> Tap it on the picture.'; track('fishy_pressed',{case_id:items[i].id}); };
+/* Feedback goes to a Google Form. Fill in formResponse URL and entry IDs to switch it on. */
+const FEEDBACK={ url:'', fields:{ day:'', score:'', results:'', favorite:'', confusing:'', tomorrow:'', tester:'' } };
+function testerId(){ try{ let t=localStorage.getItem('nt_tester'); if(!t){ t=Math.random().toString(36).slice(2,8); localStorage.setItem('nt_tester',t);} return t; }catch(e){ return 'anon'; } }
+function sendFeedback(data){
+  track('feedback_submitted',data);
+  try{ const all=JSON.parse(localStorage.getItem('nt_feedback')||'[]'); all.push(data); localStorage.setItem('nt_feedback',JSON.stringify(all)); }catch(e){}
+  if(!FEEDBACK.url) return;
+  const body=new URLSearchParams(); for(const k in FEEDBACK.fields){ if(FEEDBACK.fields[k]) body.append(FEEDBACK.fields[k], data[k]??''); }
+  fetch(FEEDBACK.url,{method:'POST',mode:'no-cors',body}).catch(()=>{});
+}
 function summary(){
   const n=results.filter(Boolean).length; track('set_completed',{score:n});
   const tiles=results.map(r=>r?'🟩':'🟥').join('');
   const share=`Nice Try #00${day+1}  ${tiles}  ${n}/5\nnicetry.game`;
-  $('card').innerHTML=`<div style="display:flex;flex-direction:column;gap:14px;padding:8px 2px">
+  const names={bars:'Sales doubled',shelf:'Cereal box',ad:'Diet pill ad',bus:'Bus rides',stock:'Sparkline stock',bacon:'Bacon risk',chips:'Chip bag',unemp:'Unemployment',pie:'Phone pie chart',dentists:'Dentists',downloads:'App downloads',icecream:'Ice cream',sale:'70% off sign',shirt:'Shirt sale',salary:'Average pay'};
+  $('card').innerHTML=`<div class="fb">
     <div style="font:800 30px/1.05 var(--f-display)">${n===5?'Nothing gets past you.':n>=3?'Pretty sharp.':'They got you today.'}</div>
-    <div class="share">${share}</div><div class="rule">Spoiler-free. Paste it anywhere.${day<2?' Come back tomorrow for Day '+(day+2)+'.':''}</div></div>`;
+    <div class="share">${share}</div>
+    <form id="fb" class="fb">
+      <div class="q"><label>Which one was your favorite?</label><div class="chips" id="fav">${items.map(it=>`<button type="button" data-v="${it.id}">${names[it.id]||it.id}</button>`).join('')}</div></div>
+      <div class="q"><label>Would you play tomorrow’s?</label><div class="chips" id="tom">${['Yes','Maybe','No'].map(v=>`<button type="button" data-v="${v}">${v}</button>`).join('')}</div></div>
+      <div class="q"><label for="conf">Was anything confusing or unfair? <span class="opt">(optional)</span></label><textarea id="conf" rows="3" placeholder="e.g. I spotted it but tapped the wrong spot"></textarea></div>
+      <button type="submit" class="primary" id="send">Send feedback</button>
+    </form>
+    <div class="rule" id="thanks" hidden>Thanks! That helps a lot.${day<2?' Come back tomorrow for Day '+(day+2)+'.':''}</div>
+  </div>`;
+  const pick=(id)=>{ const box=$(id); box.onclick=e=>{const b=e.target.closest('button'); if(!b) return; box.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); box.dataset.v=b.dataset.v;}; };
+  pick('fav'); pick('tom');
+  $('fb').onsubmit=e=>{ e.preventDefault();
+    sendFeedback({ day:day+1, score:n, results:results.map((r,k)=>items[k].id+(r?':right':':wrong')).join(' '), favorite:$('fav').dataset.v||'', tomorrow:$('tom').dataset.v||'', confusing:$('conf').value.trim(), tester:testerId() });
+    $('fb').hidden=true; $('thanks').hidden=false; };
   $('caption').innerHTML=''; $('legit').hidden=true; $('fishy').hidden=true; $('card').classList.remove('pointing');
   const nx=$('next'); nx.textContent='Copy result'; nx.onclick=()=>{track('share_clicked',{}); navigator.clipboard?.writeText(share).then(()=>nx.textContent='Copied').catch(()=>{});};
   dots();
 }
+
 startDay();
 })();
 </script>
