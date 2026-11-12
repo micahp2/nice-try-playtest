@@ -235,10 +235,10 @@ function salSVG(showMed){
 const DAYS=[[
  { id:'bars', trick:['axis'], render(el){el.innerHTML=barsSVG(100,105);}, fix(el){tween(900,k=>{el.innerHTML=barsSVG(100-100*k,105+15*k);});},
    win:'<b>The axis starts at 100.</b> From zero, sales grew 2%. Not doubled.', lose:'The trick was the axis. It starts at 100, so 2% growth looks like double.' },
- { id:'shelf', trick:['badge'],
+ { id:'shelf', trick:['badge','bigtag'],
    render(el){el.innerHTML=`<div class="shelf">
      <div class="box"><div class="cereal hit" data-hit="box" style="height:150px;background:#c2410c">Crunch<br>Os</div><div class="tag hit" data-hit="tag">$4.29<small>18 oz</small></div><div class="unit" id="u1">23.8¢ / oz</div></div>
-     <div class="box"><div class="cereal hit" data-hit="box" style="height:190px;background:#c2410c">Crunch<br>Os</div><div class="badge hit" data-hit="badge" id="badge">BIG VALUE SIZE!</div><div class="tag hit" data-hit="tag">$6.49<small>24 oz</small></div><div class="unit" id="u2">27.0¢ / oz</div></div></div>`;},
+     <div class="box"><div class="cereal hit" data-hit="box" style="height:190px;background:#c2410c">Crunch<br>Os</div><div class="badge hit" data-hit="badge" id="badge">BIG VALUE SIZE!</div><div class="tag hit" data-hit="bigtag">$6.49<small>24 oz</small></div><div class="unit" id="u2">27.0¢ / oz</div></div></div>`;},
    fix(el){el.querySelector('#badge').classList.add('struck'); setTimeout(()=>{el.querySelector('#u1').classList.add('show','good'); el.querySelector('#u2').classList.add('show','bad');},200);},
    win:'<b>"Big Value" costs more per ounce.</b> The small box is the better deal.', lose:'The trick was the badge. Per ounce, the "big value" box costs more.' },
  { id:'ad', trick:['fine','claim'],
