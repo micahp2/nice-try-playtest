@@ -326,7 +326,7 @@ $('card').addEventListener('click',e=>{ if(locked) return; const h=e.target.clos
 $('legit').onclick=()=>answer('legit');
 $('fishy').onclick=()=>{ if(locked) return; $('card').classList.add('pointing'); $('caption').innerHTML='<b>Where\u2019s the trick?</b> Tap it on the picture.'; track('fishy_pressed',{case_id:items[i].id}); };
 /* Feedback goes to a Google Form. Fill in formResponse URL and entry IDs to switch it on. */
-const FEEDBACK={ url:'', fields:{ day:'', score:'', results:'', favorite:'', confusing:'', tomorrow:'', tester:'' } };
+const FEEDBACK={ url:'https://docs.google.com/forms/d/e/1FAIpQLSd1tiM_FkMzHN_dp_yPtt9rCSkZeP5D1ls3RWlZh78Wyg0OJA/formResponse', fields:{ day:'entry.1004333988', score:'entry.910227781', results:'entry.145967924', favorite:'entry.1223052478', tomorrow:'entry.91824201', confusing:'entry.559457185', tester:'entry.1516201431' } };
 function testerId(){ try{ let t=localStorage.getItem('nt_tester'); if(!t){ t=Math.random().toString(36).slice(2,8); localStorage.setItem('nt_tester',t);} return t; }catch(e){ return 'anon'; } }
 function sendFeedback(data){
   track('feedback_submitted',data);
